@@ -30,6 +30,12 @@ No frontend, backend, database, authentication, image upload, or package setup h
 - Upload or attach food photos in a later version
 - View food waste statistics in a later version
 
+## Project Structure
+
+- `client/` - future React frontend
+- `server/` - future Node.js and Express backend
+- `docs/` - planning and learning documentation
+
 ## Documentation
 
 - [Project idea](docs/idea.md)
