@@ -1,0 +1,14 @@
+{
+  "name": "food-expiry-tracker-server",
+  "version": "0.1.0",
+  "description": "Basic Express backend for the Food Expiry Tracker project.",
+  "main": "src/server.js",
+  "private": true,
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
