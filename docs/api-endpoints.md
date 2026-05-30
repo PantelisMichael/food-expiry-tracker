@@ -29,6 +29,13 @@ Temporary food item fields:
 - `unit`
 - `location`
 - `expiryDate`
+- `status`
+
+Temporary expiry status values:
+
+- `SAFE`
+- `EXPIRING_SOON`
+- `EXPIRED`
 
 Planned later endpoints:
 

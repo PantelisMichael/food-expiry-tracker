@@ -2,6 +2,9 @@ const express = require("express");
 
 const router = express.Router();
 
+const EXPIRING_SOON_DAYS = 3;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
 // Temporary in-memory food data.
 // This will reset whenever the server restarts and will later be replaced by a database.
 const foods = [
@@ -36,8 +39,43 @@ const foods = [
 
 let nextFoodId = 4;
 
+function getTodayDateOnly() {
+  const today = new Date();
+
+  return new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+}
+
+function getDateFromDateString(dateString) {
+  const [year, month, day] = dateString.split("-").map(Number);
+
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function getExpiryStatus(expiryDate) {
+  const today = getTodayDateOnly();
+  const expiry = getDateFromDateString(expiryDate);
+  const daysUntilExpiry = Math.floor((expiry - today) / MS_PER_DAY);
+
+  if (daysUntilExpiry < 0) {
+    return "EXPIRED";
+  }
+
+  if (daysUntilExpiry <= EXPIRING_SOON_DAYS) {
+    return "EXPIRING_SOON";
+  }
+
+  return "SAFE";
+}
+
+function addExpiryStatus(food) {
+  return {
+    ...food,
+    status: getExpiryStatus(food.expiryDate),
+  };
+}
+
 router.get("/api/foods", (req, res) => {
-  res.json(foods);
+  res.json(foods.map(addExpiryStatus));
 });
 
 router.get("/api/foods/:id", (req, res) => {
@@ -50,7 +88,7 @@ router.get("/api/foods/:id", (req, res) => {
     });
   }
 
-  res.json(food);
+  res.json(addExpiryStatus(food));
 });
 
 router.post("/api/foods", (req, res) => {
@@ -75,7 +113,7 @@ router.post("/api/foods", (req, res) => {
   foods.push(newFood);
   nextFoodId += 1;
 
-  res.status(201).json(newFood);
+  res.status(201).json(addExpiryStatus(newFood));
 });
 
 module.exports = router;
