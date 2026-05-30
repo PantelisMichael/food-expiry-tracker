@@ -1,24 +1,45 @@
 # API Endpoints
 
-This document is an early plan for future REST API endpoints.
+This document tracks the REST API endpoints for the Food Expiry Tracker backend.
 
-No backend has been created yet. These endpoint ideas are only planning notes.
+The backend currently uses temporary in-memory data. Later, these routes will use PostgreSQL and Prisma.
+
+## Health
+
+Implemented endpoint:
+
+- `GET /api/health`
+
+Returns a simple response confirming that the API is running.
 
 ## Food Items
 
-Possible future endpoints:
+Implemented endpoints:
 
-- `GET /api/food-items`
-- `POST /api/food-items`
-- `GET /api/food-items/:id`
-- `PATCH /api/food-items/:id`
-- `DELETE /api/food-items/:id`
-- `PATCH /api/food-items/:id/consume`
-- `PATCH /api/food-items/:id/waste`
+- `GET /api/foods`
+- `POST /api/foods`
+- `GET /api/foods/:id`
+
+Temporary food item fields:
+
+- `id`
+- `name`
+- `category`
+- `quantity`
+- `unit`
+- `location`
+- `expiryDate`
+
+Planned later endpoints:
+
+- `PATCH /api/foods/:id`
+- `DELETE /api/foods/:id`
+- `PATCH /api/foods/:id/consume`
+- `PATCH /api/foods/:id/waste`
 
 ## Shopping List
 
-Possible future endpoints:
+Planned later endpoints:
 
 - `GET /api/shopping-list`
 - `POST /api/shopping-list`
