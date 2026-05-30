@@ -20,6 +20,10 @@ Implemented endpoints:
 - `POST /api/foods`
 - `GET /api/foods/:id`
 
+Optional query parameters:
+
+- `GET /api/foods?sort=expiryDate` returns foods ordered by expiry date, with the soonest expiry first.
+
 Temporary food item fields:
 
 - `id`

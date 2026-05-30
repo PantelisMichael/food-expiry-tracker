@@ -74,8 +74,23 @@ function addExpiryStatus(food) {
   };
 }
 
+function sortFoodsByExpiryDate(foodList) {
+  return [...foodList].sort((firstFood, secondFood) => {
+    const firstExpiryDate = getDateFromDateString(firstFood.expiryDate);
+    const secondExpiryDate = getDateFromDateString(secondFood.expiryDate);
+
+    return firstExpiryDate - secondExpiryDate;
+  });
+}
+
 router.get("/api/foods", (req, res) => {
-  res.json(foods.map(addExpiryStatus));
+  let foodList = foods.map(addExpiryStatus);
+
+  if (req.query.sort === "expiryDate") {
+    foodList = sortFoodsByExpiryDate(foodList);
+  }
+
+  res.json(foodList);
 });
 
 router.get("/api/foods/:id", (req, res) => {
