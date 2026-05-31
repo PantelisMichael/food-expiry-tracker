@@ -146,6 +146,57 @@ router.post("/api/foods", (req, res) => {
   res.status(201).json(addExpiryStatus(newFood));
 });
 
+router.patch("/api/foods/:id", (req, res) => {
+  const foodId = Number(req.params.id);
+  const food = foods.find((item) => item.id === foodId);
+
+  if (!food) {
+    return res.status(404).json({
+      error: "Food item not found",
+    });
+  }
+
+  const { name, category, quantity, unit, location, expiryDate } = req.body;
+
+  if (name !== undefined && !name) {
+    return res.status(400).json({
+      error: "Name cannot be empty",
+    });
+  }
+
+  if (expiryDate !== undefined && !expiryDate) {
+    return res.status(400).json({
+      error: "Expiry date cannot be empty",
+    });
+  }
+
+  if (name !== undefined) {
+    food.name = name;
+  }
+
+  if (category !== undefined) {
+    food.category = category;
+  }
+
+  if (quantity !== undefined) {
+    food.quantity = quantity;
+  }
+
+  if (unit !== undefined) {
+    food.unit = unit;
+  }
+
+  if (location !== undefined) {
+    food.location = location;
+  }
+
+  if (expiryDate !== undefined) {
+    food.expiryDate = expiryDate;
+  }
+
+  res.json(addExpiryStatus(food));
+});
+
 router.patch("/api/foods/:id/consume", (req, res) => {
   const foodId = Number(req.params.id);
   const food = foods.find((item) => item.id === foodId);

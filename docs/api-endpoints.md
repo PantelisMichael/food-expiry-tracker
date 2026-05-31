@@ -19,8 +19,12 @@ Implemented endpoints:
 - `GET /api/foods`
 - `POST /api/foods`
 - `GET /api/foods/:id`
+- `PATCH /api/foods/:id`
 - `PATCH /api/foods/:id/consume`
 - `PATCH /api/foods/:id/waste`
+
+`PATCH /api/foods/:id` can update `name`, `category`, `quantity`, `unit`, `location`, and `expiryDate`.
+Use the consume and waste endpoints to change `itemStatus`.
 
 Optional query parameters:
 
@@ -54,7 +58,6 @@ Temporary item status values:
 
 Planned later endpoints:
 
-- `PATCH /api/foods/:id`
 - `DELETE /api/foods/:id`
 
 ## Shopping List
