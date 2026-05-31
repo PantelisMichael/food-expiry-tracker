@@ -20,6 +20,7 @@ Implemented endpoints:
 - `POST /api/foods`
 - `GET /api/foods/:id`
 - `PATCH /api/foods/:id`
+- `DELETE /api/foods/:id`
 - `PATCH /api/foods/:id/consume`
 - `PATCH /api/foods/:id/waste`
 
@@ -55,10 +56,6 @@ Temporary item status values:
 - `ACTIVE`
 - `CONSUMED`
 - `WASTED`
-
-Planned later endpoints:
-
-- `DELETE /api/foods/:id`
 
 ## Shopping List
 

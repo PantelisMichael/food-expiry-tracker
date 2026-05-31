@@ -197,6 +197,24 @@ router.patch("/api/foods/:id", (req, res) => {
   res.json(addExpiryStatus(food));
 });
 
+router.delete("/api/foods/:id", (req, res) => {
+  const foodId = Number(req.params.id);
+  const foodIndex = foods.findIndex((item) => item.id === foodId);
+
+  if (foodIndex === -1) {
+    return res.status(404).json({
+      error: "Food item not found",
+    });
+  }
+
+  const deletedFood = foods.splice(foodIndex, 1)[0];
+
+  res.json({
+    message: "Food item deleted",
+    food: addExpiryStatus(deletedFood),
+  });
+});
+
 router.patch("/api/foods/:id/consume", (req, res) => {
   const foodId = Number(req.params.id);
   const food = foods.find((item) => item.id === foodId);
