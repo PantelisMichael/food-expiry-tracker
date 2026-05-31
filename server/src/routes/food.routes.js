@@ -5,6 +5,7 @@ const router = express.Router();
 const EXPIRING_SOON_DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const VALID_EXPIRY_STATUSES = ["SAFE", "EXPIRING_SOON", "EXPIRED"];
+const VALID_ITEM_STATUSES = ["ACTIVE", "CONSUMED", "WASTED"];
 
 // Temporary in-memory food data.
 // This will reset whenever the server restarts and will later be replaced by a database.
@@ -116,8 +117,20 @@ function sortFoodsByExpiryDate(foodList) {
   });
 }
 
+function getFoodsWithExpiryStatus() {
+  return foods.map(addExpiryStatus);
+}
+
+function getUseFirstFoods() {
+  const activeFoods = getFoodsWithExpiryStatus().filter((food) => {
+    return food.itemStatus === "ACTIVE" && food.status !== "EXPIRED";
+  });
+
+  return sortFoodsByExpiryDate(activeFoods);
+}
+
 router.get("/api/foods", (req, res) => {
-  let foodList = foods.map(addExpiryStatus);
+  let foodList = getFoodsWithExpiryStatus();
 
   if (req.query.status && !VALID_EXPIRY_STATUSES.includes(req.query.status)) {
     return res.status(400).json({
@@ -129,11 +142,25 @@ router.get("/api/foods", (req, res) => {
     foodList = foodList.filter((food) => food.status === req.query.status);
   }
 
+  if (req.query.itemStatus && !VALID_ITEM_STATUSES.includes(req.query.itemStatus)) {
+    return res.status(400).json({
+      error: "itemStatus must be ACTIVE, CONSUMED, or WASTED",
+    });
+  }
+
+  if (req.query.itemStatus) {
+    foodList = foodList.filter((food) => food.itemStatus === req.query.itemStatus);
+  }
+
   if (req.query.sort === "expiryDate") {
     foodList = sortFoodsByExpiryDate(foodList);
   }
 
   res.json(foodList);
+});
+
+router.get("/api/foods/use-first", (req, res) => {
+  res.json(getUseFirstFoods());
 });
 
 router.get("/api/foods/:id", (req, res) => {

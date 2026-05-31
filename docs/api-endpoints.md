@@ -17,6 +17,7 @@ Returns a simple response confirming that the API is running.
 Implemented endpoints:
 
 - `GET /api/foods`
+- `GET /api/foods/use-first`
 - `POST /api/foods`
 - `GET /api/foods/:id`
 - `PATCH /api/foods/:id`
@@ -26,6 +27,8 @@ Implemented endpoints:
 
 `PATCH /api/foods/:id` can update `name`, `category`, `quantity`, `unit`, `location`, and `expiryDate`.
 Use the consume and waste endpoints to change `itemStatus`.
+
+`GET /api/foods/use-first` returns active, non-expired foods ordered by the closest expiry date.
 
 Validation notes:
 
@@ -37,7 +40,9 @@ Optional query parameters:
 
 - `GET /api/foods?sort=expiryDate` returns foods ordered by expiry date, with the soonest expiry first.
 - `GET /api/foods?status=EXPIRING_SOON` returns foods with a matching expiry status.
+- `GET /api/foods?itemStatus=ACTIVE` returns foods with a matching item status.
 - `GET /api/foods?status=EXPIRING_SOON&sort=expiryDate` filters by status and sorts by expiry date.
+- `GET /api/foods?itemStatus=ACTIVE&status=EXPIRING_SOON&sort=expiryDate` combines item status filtering, expiry status filtering, and sorting.
 
 Temporary food item fields:
 
