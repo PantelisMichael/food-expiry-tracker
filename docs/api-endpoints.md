@@ -18,6 +18,7 @@ Implemented endpoints:
 
 - `GET /api/foods`
 - `GET /api/foods/use-first`
+- `GET /api/foods/stats`
 - `POST /api/foods`
 - `GET /api/foods/:id`
 - `PATCH /api/foods/:id`
@@ -29,6 +30,8 @@ Implemented endpoints:
 Use the consume and waste endpoints to change `itemStatus`.
 
 `GET /api/foods/use-first` returns active, non-expired foods ordered by the closest expiry date.
+
+`GET /api/foods/stats` returns temporary summary counts for total foods, item statuses, expiry statuses, categories, and use-first foods.
 
 Validation notes:
 

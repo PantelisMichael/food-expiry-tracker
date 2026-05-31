@@ -129,6 +129,33 @@ function getUseFirstFoods() {
   return sortFoodsByExpiryDate(activeFoods);
 }
 
+function getFoodStats() {
+  const foodList = getFoodsWithExpiryStatus();
+  const stats = {
+    total: foodList.length,
+    useFirstCount: getUseFirstFoods().length,
+    itemStatusCounts: {
+      ACTIVE: 0,
+      CONSUMED: 0,
+      WASTED: 0,
+    },
+    expiryStatusCounts: {
+      SAFE: 0,
+      EXPIRING_SOON: 0,
+      EXPIRED: 0,
+    },
+    categoryCounts: {},
+  };
+
+  foodList.forEach((food) => {
+    stats.itemStatusCounts[food.itemStatus] += 1;
+    stats.expiryStatusCounts[food.status] += 1;
+    stats.categoryCounts[food.category] = (stats.categoryCounts[food.category] || 0) + 1;
+  });
+
+  return stats;
+}
+
 router.get("/api/foods", (req, res) => {
   let foodList = getFoodsWithExpiryStatus();
 
@@ -161,6 +188,10 @@ router.get("/api/foods", (req, res) => {
 
 router.get("/api/foods/use-first", (req, res) => {
   res.json(getUseFirstFoods());
+});
+
+router.get("/api/foods/stats", (req, res) => {
+  res.json(getFoodStats());
 });
 
 router.get("/api/foods/:id", (req, res) => {
