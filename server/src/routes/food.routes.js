@@ -55,6 +55,35 @@ function getDateFromDateString(dateString) {
   return new Date(Date.UTC(year, month - 1, day));
 }
 
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.trim() !== "";
+}
+
+function isValidDateString(value) {
+  if (!isNonEmptyString(value)) {
+    return false;
+  }
+
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
+  if (!datePattern.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = getDateFromDateString(value);
+
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
+function isValidQuantity(value) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
 function getExpiryStatus(expiryDate) {
   const today = getTodayDateOnly();
   const expiry = getDateFromDateString(expiryDate);
@@ -123,19 +152,31 @@ router.get("/api/foods/:id", (req, res) => {
 router.post("/api/foods", (req, res) => {
   const { name, category, quantity, unit, location, expiryDate } = req.body;
 
-  if (!name || !expiryDate) {
+  if (!isNonEmptyString(name) || !isNonEmptyString(expiryDate)) {
     return res.status(400).json({
       error: "Name and expiryDate are required",
     });
   }
 
+  if (!isValidDateString(expiryDate)) {
+    return res.status(400).json({
+      error: "expiryDate must be a valid date in YYYY-MM-DD format",
+    });
+  }
+
+  if (quantity !== undefined && !isValidQuantity(quantity)) {
+    return res.status(400).json({
+      error: "Quantity must be a positive number",
+    });
+  }
+
   const newFood = {
     id: nextFoodId,
-    name,
-    category: category || "Uncategorized",
+    name: name.trim(),
+    category: isNonEmptyString(category) ? category.trim() : "Uncategorized",
     quantity: quantity || 1,
-    unit: unit || "item",
-    location: location || "Unknown",
+    unit: isNonEmptyString(unit) ? unit.trim() : "item",
+    location: isNonEmptyString(location) ? location.trim() : "Unknown",
     expiryDate,
     itemStatus: "ACTIVE",
   };
@@ -158,24 +199,36 @@ router.patch("/api/foods/:id", (req, res) => {
 
   const { name, category, quantity, unit, location, expiryDate } = req.body;
 
-  if (name !== undefined && !name) {
+  if (name !== undefined && !isNonEmptyString(name)) {
     return res.status(400).json({
       error: "Name cannot be empty",
     });
   }
 
-  if (expiryDate !== undefined && !expiryDate) {
+  if (expiryDate !== undefined && !isNonEmptyString(expiryDate)) {
     return res.status(400).json({
       error: "Expiry date cannot be empty",
     });
   }
 
+  if (expiryDate !== undefined && !isValidDateString(expiryDate)) {
+    return res.status(400).json({
+      error: "expiryDate must be a valid date in YYYY-MM-DD format",
+    });
+  }
+
+  if (quantity !== undefined && !isValidQuantity(quantity)) {
+    return res.status(400).json({
+      error: "Quantity must be a positive number",
+    });
+  }
+
   if (name !== undefined) {
-    food.name = name;
+    food.name = name.trim();
   }
 
   if (category !== undefined) {
-    food.category = category;
+    food.category = isNonEmptyString(category) ? category.trim() : "Uncategorized";
   }
 
   if (quantity !== undefined) {
@@ -183,11 +236,11 @@ router.patch("/api/foods/:id", (req, res) => {
   }
 
   if (unit !== undefined) {
-    food.unit = unit;
+    food.unit = isNonEmptyString(unit) ? unit.trim() : "item";
   }
 
   if (location !== undefined) {
-    food.location = location;
+    food.location = isNonEmptyString(location) ? location.trim() : "Unknown";
   }
 
   if (expiryDate !== undefined) {

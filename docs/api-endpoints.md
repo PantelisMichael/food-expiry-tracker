@@ -27,6 +27,12 @@ Implemented endpoints:
 `PATCH /api/foods/:id` can update `name`, `category`, `quantity`, `unit`, `location`, and `expiryDate`.
 Use the consume and waste endpoints to change `itemStatus`.
 
+Validation notes:
+
+- `name` is required and cannot be empty.
+- `expiryDate` is required and must use `YYYY-MM-DD`.
+- `quantity`, when provided, must be a positive number.
+
 Optional query parameters:
 
 - `GET /api/foods?sort=expiryDate` returns foods ordered by expiry date, with the soonest expiry first.
