@@ -19,10 +19,14 @@ Implemented endpoints:
 - `GET /api/foods`
 - `POST /api/foods`
 - `GET /api/foods/:id`
+- `PATCH /api/foods/:id/consume`
+- `PATCH /api/foods/:id/waste`
 
 Optional query parameters:
 
 - `GET /api/foods?sort=expiryDate` returns foods ordered by expiry date, with the soonest expiry first.
+- `GET /api/foods?status=EXPIRING_SOON` returns foods with a matching expiry status.
+- `GET /api/foods?status=EXPIRING_SOON&sort=expiryDate` filters by status and sorts by expiry date.
 
 Temporary food item fields:
 
@@ -34,6 +38,7 @@ Temporary food item fields:
 - `location`
 - `expiryDate`
 - `status`
+- `itemStatus`
 
 Temporary expiry status values:
 
@@ -41,12 +46,16 @@ Temporary expiry status values:
 - `EXPIRING_SOON`
 - `EXPIRED`
 
+Temporary item status values:
+
+- `ACTIVE`
+- `CONSUMED`
+- `WASTED`
+
 Planned later endpoints:
 
 - `PATCH /api/foods/:id`
 - `DELETE /api/foods/:id`
-- `PATCH /api/foods/:id/consume`
-- `PATCH /api/foods/:id/waste`
 
 ## Shopping List
 
