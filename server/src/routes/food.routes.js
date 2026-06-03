@@ -1,202 +1,106 @@
 const express = require("express");
+const {
+  addFood,
+  deleteFoodByIndex,
+  findFoodById,
+  findFoodIndexById,
+  getFoods,
+  getNextFoodId,
+} = require("../data/foods.data");
+const {
+  VALID_EXPIRY_STATUSES,
+  VALID_ITEM_STATUSES,
+  VALID_SORT_FIELDS,
+  VALID_SORT_ORDERS,
+  addExpiryStatus,
+  getFoodIdFromRequest,
+  getFoodStats,
+  getFoodsWithExpiryStatus,
+  getUseFirstFoods,
+  isNonEmptyString,
+  isValidDateString,
+  isValidQuantity,
+  matchesText,
+  sortFoods,
+} = require("../utils/food.utils");
 
 const router = express.Router();
 
-const EXPIRING_SOON_DAYS = 3;
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const VALID_EXPIRY_STATUSES = ["SAFE", "EXPIRING_SOON", "EXPIRED"];
-const VALID_ITEM_STATUSES = ["ACTIVE", "CONSUMED", "WASTED"];
-
-// Temporary in-memory food data.
-// This will reset whenever the server restarts and will later be replaced by a database.
-const foods = [
-  {
-    id: 1,
-    name: "Milk",
-    category: "Dairy",
-    quantity: 1,
-    unit: "carton",
-    location: "Fridge",
-    expiryDate: "2026-06-01",
-    itemStatus: "ACTIVE",
-  },
-  {
-    id: 2,
-    name: "Apples",
-    category: "Fruit",
-    quantity: 6,
-    unit: "pieces",
-    location: "Counter",
-    expiryDate: "2026-06-05",
-    itemStatus: "ACTIVE",
-  },
-  {
-    id: 3,
-    name: "Chicken Breast",
-    category: "Meat",
-    quantity: 500,
-    unit: "grams",
-    location: "Freezer",
-    expiryDate: "2026-05-30",
-    itemStatus: "ACTIVE",
-  },
-];
-
-let nextFoodId = 4;
-
-function getTodayDateOnly() {
-  const today = new Date();
-
-  return new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
-}
-
-function getDateFromDateString(dateString) {
-  const [year, month, day] = dateString.split("-").map(Number);
-
-  return new Date(Date.UTC(year, month - 1, day));
-}
-
-function isNonEmptyString(value) {
-  return typeof value === "string" && value.trim() !== "";
-}
-
-function isValidDateString(value) {
-  if (!isNonEmptyString(value)) {
-    return false;
-  }
-
-  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-
-  if (!datePattern.test(value)) {
-    return false;
-  }
-
-  const [year, month, day] = value.split("-").map(Number);
-  const date = getDateFromDateString(value);
-
-  return (
-    date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day
-  );
-}
-
-function isValidQuantity(value) {
-  return typeof value === "number" && Number.isFinite(value) && value > 0;
-}
-
-function getExpiryStatus(expiryDate) {
-  const today = getTodayDateOnly();
-  const expiry = getDateFromDateString(expiryDate);
-  const daysUntilExpiry = Math.floor((expiry - today) / MS_PER_DAY);
-
-  if (daysUntilExpiry < 0) {
-    return "EXPIRED";
-  }
-
-  if (daysUntilExpiry <= EXPIRING_SOON_DAYS) {
-    return "EXPIRING_SOON";
-  }
-
-  return "SAFE";
-}
-
-function addExpiryStatus(food) {
-  return {
-    ...food,
-    status: getExpiryStatus(food.expiryDate),
-  };
-}
-
-function sortFoodsByExpiryDate(foodList) {
-  return [...foodList].sort((firstFood, secondFood) => {
-    const firstExpiryDate = getDateFromDateString(firstFood.expiryDate);
-    const secondExpiryDate = getDateFromDateString(secondFood.expiryDate);
-
-    return firstExpiryDate - secondExpiryDate;
-  });
-}
-
-function getFoodsWithExpiryStatus() {
-  return foods.map(addExpiryStatus);
-}
-
-function getUseFirstFoods() {
-  const activeFoods = getFoodsWithExpiryStatus().filter((food) => {
-    return food.itemStatus === "ACTIVE" && food.status !== "EXPIRED";
-  });
-
-  return sortFoodsByExpiryDate(activeFoods);
-}
-
-function getFoodStats() {
-  const foodList = getFoodsWithExpiryStatus();
-  const stats = {
-    total: foodList.length,
-    useFirstCount: getUseFirstFoods().length,
-    itemStatusCounts: {
-      ACTIVE: 0,
-      CONSUMED: 0,
-      WASTED: 0,
-    },
-    expiryStatusCounts: {
-      SAFE: 0,
-      EXPIRING_SOON: 0,
-      EXPIRED: 0,
-    },
-    categoryCounts: {},
-  };
-
-  foodList.forEach((food) => {
-    stats.itemStatusCounts[food.itemStatus] += 1;
-    stats.expiryStatusCounts[food.status] += 1;
-    stats.categoryCounts[food.category] = (stats.categoryCounts[food.category] || 0) + 1;
-  });
-
-  return stats;
-}
-
 router.get("/api/foods", (req, res) => {
-  let foodList = getFoodsWithExpiryStatus();
+  let foodList = getFoodsWithExpiryStatus(getFoods());
+  const { search, category, location, status, itemStatus, sort, order = "asc" } = req.query;
 
-  if (req.query.status && !VALID_EXPIRY_STATUSES.includes(req.query.status)) {
+  if (status && !VALID_EXPIRY_STATUSES.includes(status)) {
     return res.status(400).json({
       error: "Status must be SAFE, EXPIRING_SOON, or EXPIRED",
     });
   }
 
-  if (req.query.status) {
-    foodList = foodList.filter((food) => food.status === req.query.status);
-  }
-
-  if (req.query.itemStatus && !VALID_ITEM_STATUSES.includes(req.query.itemStatus)) {
+  if (itemStatus && !VALID_ITEM_STATUSES.includes(itemStatus)) {
     return res.status(400).json({
       error: "itemStatus must be ACTIVE, CONSUMED, or WASTED",
     });
   }
 
-  if (req.query.itemStatus) {
-    foodList = foodList.filter((food) => food.itemStatus === req.query.itemStatus);
+  if (sort && !VALID_SORT_FIELDS.includes(sort)) {
+    return res.status(400).json({
+      error: "sort must be expiryDate or name",
+    });
   }
 
-  if (req.query.sort === "expiryDate") {
-    foodList = sortFoodsByExpiryDate(foodList);
+  if (!VALID_SORT_ORDERS.includes(order)) {
+    return res.status(400).json({
+      error: "order must be asc or desc",
+    });
+  }
+
+  if (status) {
+    foodList = foodList.filter((food) => food.status === status);
+  }
+
+  if (itemStatus) {
+    foodList = foodList.filter((food) => food.itemStatus === itemStatus);
+  }
+
+  if (isNonEmptyString(search)) {
+    foodList = foodList.filter((food) => {
+      return matchesText(food.name, search) || matchesText(food.category, search);
+    });
+  }
+
+  if (isNonEmptyString(category)) {
+    foodList = foodList.filter((food) => matchesText(food.category, category));
+  }
+
+  if (isNonEmptyString(location)) {
+    foodList = foodList.filter((food) => matchesText(food.location, location));
+  }
+
+  if (sort) {
+    foodList = sortFoods(foodList, sort, order);
   }
 
   res.json(foodList);
 });
 
 router.get("/api/foods/use-first", (req, res) => {
-  res.json(getUseFirstFoods());
+  res.json(getUseFirstFoods(getFoods()));
 });
 
 router.get("/api/foods/stats", (req, res) => {
-  res.json(getFoodStats());
+  res.json(getFoodStats(getFoods()));
 });
 
 router.get("/api/foods/:id", (req, res) => {
-  const foodId = Number(req.params.id);
-  const food = foods.find((item) => item.id === foodId);
+  const foodId = getFoodIdFromRequest(req);
+
+  if (!foodId) {
+    return res.status(400).json({
+      error: "Food id must be a positive number",
+    });
+  }
+
+  const food = findFoodById(foodId);
 
   if (!food) {
     return res.status(404).json({
@@ -229,7 +133,7 @@ router.post("/api/foods", (req, res) => {
   }
 
   const newFood = {
-    id: nextFoodId,
+    id: getNextFoodId(),
     name: name.trim(),
     category: isNonEmptyString(category) ? category.trim() : "Uncategorized",
     quantity: quantity || 1,
@@ -239,15 +143,21 @@ router.post("/api/foods", (req, res) => {
     itemStatus: "ACTIVE",
   };
 
-  foods.push(newFood);
-  nextFoodId += 1;
+  addFood(newFood);
 
   res.status(201).json(addExpiryStatus(newFood));
 });
 
 router.patch("/api/foods/:id", (req, res) => {
-  const foodId = Number(req.params.id);
-  const food = foods.find((item) => item.id === foodId);
+  const foodId = getFoodIdFromRequest(req);
+
+  if (!foodId) {
+    return res.status(400).json({
+      error: "Food id must be a positive number",
+    });
+  }
+
+  const food = findFoodById(foodId);
 
   if (!food) {
     return res.status(404).json({
@@ -309,8 +219,15 @@ router.patch("/api/foods/:id", (req, res) => {
 });
 
 router.delete("/api/foods/:id", (req, res) => {
-  const foodId = Number(req.params.id);
-  const foodIndex = foods.findIndex((item) => item.id === foodId);
+  const foodId = getFoodIdFromRequest(req);
+
+  if (!foodId) {
+    return res.status(400).json({
+      error: "Food id must be a positive number",
+    });
+  }
+
+  const foodIndex = findFoodIndexById(foodId);
 
   if (foodIndex === -1) {
     return res.status(404).json({
@@ -318,7 +235,7 @@ router.delete("/api/foods/:id", (req, res) => {
     });
   }
 
-  const deletedFood = foods.splice(foodIndex, 1)[0];
+  const deletedFood = deleteFoodByIndex(foodIndex);
 
   res.json({
     message: "Food item deleted",
@@ -327,8 +244,15 @@ router.delete("/api/foods/:id", (req, res) => {
 });
 
 router.patch("/api/foods/:id/consume", (req, res) => {
-  const foodId = Number(req.params.id);
-  const food = foods.find((item) => item.id === foodId);
+  const foodId = getFoodIdFromRequest(req);
+
+  if (!foodId) {
+    return res.status(400).json({
+      error: "Food id must be a positive number",
+    });
+  }
+
+  const food = findFoodById(foodId);
 
   if (!food) {
     return res.status(404).json({
@@ -342,8 +266,15 @@ router.patch("/api/foods/:id/consume", (req, res) => {
 });
 
 router.patch("/api/foods/:id/waste", (req, res) => {
-  const foodId = Number(req.params.id);
-  const food = foods.find((item) => item.id === foodId);
+  const foodId = getFoodIdFromRequest(req);
+
+  if (!foodId) {
+    return res.status(400).json({
+      error: "Food id must be a positive number",
+    });
+  }
+
+  const food = findFoodById(foodId);
 
   if (!food) {
     return res.status(404).json({

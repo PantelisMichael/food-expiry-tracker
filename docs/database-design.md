@@ -14,18 +14,28 @@ Possible fields:
 
 - `id`
 - `name`
+- `category`
 - `quantity`
+- `unit`
+- `location`
 - `expiryDate`
-- `status`
+- `itemStatus`
 - `photoUrl`
 - `createdAt`
 - `updatedAt`
 
-Possible statuses:
+Possible item statuses:
 
-- `active`
-- `consumed`
-- `wasted`
+- `ACTIVE`
+- `CONSUMED`
+- `WASTED`
+
+Calculated response fields:
+
+- `status`
+- `daysUntilExpiry`
+
+The expiry `status` should be calculated from `expiryDate` instead of stored directly in the database.
 
 ### Shopping List Items
 

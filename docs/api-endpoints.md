@@ -31,7 +31,7 @@ Use the consume and waste endpoints to change `itemStatus`.
 
 `GET /api/foods/use-first` returns active, non-expired foods ordered by the closest expiry date.
 
-`GET /api/foods/stats` returns temporary summary counts for total foods, item statuses, expiry statuses, categories, and use-first foods.
+`GET /api/foods/stats` returns temporary summary counts for total foods, item statuses, expiry statuses, categories, locations, and use-first foods.
 
 Validation notes:
 
@@ -41,10 +41,13 @@ Validation notes:
 
 Optional query parameters:
 
-- `GET /api/foods?sort=expiryDate` returns foods ordered by expiry date, with the soonest expiry first.
+- `GET /api/foods?search=milk` searches by food name or category.
+- `GET /api/foods?category=Dairy` filters by category.
+- `GET /api/foods?location=Fridge` filters by storage location.
 - `GET /api/foods?status=EXPIRING_SOON` returns foods with a matching expiry status.
 - `GET /api/foods?itemStatus=ACTIVE` returns foods with a matching item status.
-- `GET /api/foods?status=EXPIRING_SOON&sort=expiryDate` filters by status and sorts by expiry date.
+- `GET /api/foods?sort=expiryDate` returns foods ordered by expiry date, with the soonest expiry first.
+- `GET /api/foods?sort=name&order=desc` returns foods ordered by name from Z to A.
 - `GET /api/foods?itemStatus=ACTIVE&status=EXPIRING_SOON&sort=expiryDate` combines item status filtering, expiry status filtering, and sorting.
 
 Temporary food item fields:
@@ -56,6 +59,7 @@ Temporary food item fields:
 - `unit`
 - `location`
 - `expiryDate`
+- `daysUntilExpiry`
 - `status`
 - `itemStatus`
 
