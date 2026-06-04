@@ -49,6 +49,7 @@ The backend currently includes:
 - food filtering, sorting, and stats
 - request logging
 - JSON responses for unknown routes
+- safe environment variable examples in `server/.env.example`
 
 The next major backend step is PostgreSQL and Prisma setup.
 
