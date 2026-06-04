@@ -6,9 +6,11 @@ The app will eventually allow users to manage food items, track expiry dates, ke
 
 ## Current Status
 
-This project is currently in the planning and documentation stage.
+This project currently has project documentation and a basic Express backend.
 
-No frontend, backend, database, authentication, image upload, or package setup has been created yet.
+The backend uses temporary in-memory food data so REST API concepts can be learned before connecting a real database.
+
+No frontend, database, authentication, image upload, or Prisma setup has been created yet.
 
 ## Planned Stack
 
@@ -35,6 +37,20 @@ No frontend, backend, database, authentication, image upload, or package setup h
 - `client/` - future React frontend
 - `server/` - future Node.js and Express backend
 - `docs/` - planning and learning documentation
+
+## Backend Status
+
+The backend currently includes:
+
+- Express app setup
+- health endpoint
+- temporary food CRUD routes
+- expiry status calculations
+- food filtering, sorting, and stats
+- request logging
+- JSON responses for unknown routes
+
+The next major backend step is PostgreSQL and Prisma setup.
 
 ## Documentation
 

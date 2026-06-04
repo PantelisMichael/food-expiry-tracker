@@ -12,6 +12,14 @@ Implemented endpoint:
 
 Returns a simple response confirming that the API is running.
 
+## Unknown Routes
+
+Requests to routes that do not exist return `404` with a JSON error message.
+
+## Server Errors
+
+Unexpected backend errors return `500` with a JSON error message.
+
 ## Food Items
 
 Implemented endpoints:

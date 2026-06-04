@@ -4,6 +4,8 @@ This document is an early plan for the future database design.
 
 No database has been set up yet. These notes are only here to guide later implementation.
 
+The next major backend milestone is to replace temporary in-memory food data with PostgreSQL and Prisma.
+
 ## Possible Tables
 
 ### Food Items
