@@ -4,6 +4,14 @@ This document tracks the REST API endpoints for the Food Expiry Tracker backend.
 
 The backend currently uses temporary in-memory data. Later, these routes will use PostgreSQL and Prisma.
 
+## API Info
+
+Implemented endpoint:
+
+- `GET /api`
+
+Returns basic API metadata and links to important endpoints.
+
 ## Health
 
 Implemented endpoint:
