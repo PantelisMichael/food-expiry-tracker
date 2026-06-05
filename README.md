@@ -58,6 +58,7 @@ Useful backend commands:
 - `npm run dev` - run the backend in watch mode
 - `npm run start` - run the backend normally
 - `npm run check` - check backend JavaScript syntax
+- `npm test` - run backend API integration tests
 
 ## Documentation
 
