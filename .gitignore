@@ -2,4 +2,5 @@ node_modules/
 .env
 dist/
 build/
+server/src/generated/prisma/
 docs/learning-log.md

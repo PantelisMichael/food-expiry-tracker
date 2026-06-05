@@ -5,12 +5,25 @@
   "main": "src/server.js",
   "private": true,
   "scripts": {
-    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/env.js && node --check src/data/foods.data.js && node --check src/utils/food.utils.js && node --check src/middleware/errorHandler.js && node --check src/middleware/notFoundHandler.js && node --check src/middleware/requestLogger.js && node --check src/routes/api.routes.js && node --check src/routes/food.routes.js && node --check src/routes/health.routes.js && node --check test/api.test.js",
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/database.js && node --check src/config/env.js && node --check src/data/foods.data.js && node --check src/utils/food.utils.js && node --check src/middleware/errorHandler.js && node --check src/middleware/notFoundHandler.js && node --check src/middleware/requestLogger.js && node --check src/routes/api.routes.js && node --check src/routes/food.routes.js && node --check src/routes/health.routes.js && node --check test/api.test.js",
+    "db:format": "prisma format",
+    "db:generate": "prisma generate",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:status": "prisma migrate status",
+    "db:validate": "prisma validate",
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "test": "node --test test/api.test.js"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.21.0"
+  },
+  "devDependencies": {
+    "prisma": "^7.8.0"
   }
 }

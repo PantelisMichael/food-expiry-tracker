@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ItemStatus {
+  ACTIVE
+  CONSUMED
+  WASTED
+}
+
+model Food {
+  id         Int        @id @default(autoincrement())
+  name       String
+  category   String     @default("Uncategorized")
+  quantity   Float      @default(1)
+  unit       String     @default("item")
+  location   String     @default("Unknown")
+  expiryDate DateTime   @db.Date
+  itemStatus ItemStatus @default(ACTIVE)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}

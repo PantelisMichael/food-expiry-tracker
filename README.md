@@ -6,11 +6,11 @@ The app will eventually allow users to manage food items, track expiry dates, ke
 
 ## Current Status
 
-This project currently has project documentation and a basic Express backend.
+This project currently has project documentation, a basic Express backend, and an initial Prisma schema for PostgreSQL.
 
-The backend uses temporary in-memory food data so REST API concepts can be learned before connecting a real database.
+The backend routes still use temporary in-memory food data so REST API concepts can be learned before connecting them to the database.
 
-No frontend, database, authentication, image upload, or Prisma setup has been created yet.
+No frontend, authentication, image upload, or live database connection has been created yet. The first database migration exists but has not been applied.
 
 ## Planned Stack
 
@@ -50,8 +50,11 @@ The backend currently includes:
 - request logging
 - JSON responses for unknown routes
 - safe environment variable examples in `server/.env.example`
+- initial PostgreSQL and Prisma schema for food items
+- first database migration for the `Food` table
+- shared Prisma Client setup for future database queries
 
-The next major backend step is PostgreSQL and Prisma setup.
+The next major backend step is applying the migration to a local PostgreSQL database, then replacing the in-memory food queries with Prisma Client queries.
 
 Useful backend commands:
 
@@ -59,6 +62,14 @@ Useful backend commands:
 - `npm run start` - run the backend normally
 - `npm run check` - check backend JavaScript syntax
 - `npm test` - run backend API integration tests
+- `npm run db:format` - format the Prisma schema
+- `npm run db:generate` - generate the Prisma Client used by the backend
+- `npm run db:validate` - validate the Prisma schema
+- `npm run db:migrate:dev` - create and apply migrations during local development
+- `npm run db:migrate:status` - show which migrations have been applied
+- `npm run db:migrate:deploy` - apply existing migrations without creating new ones
+
+Prisma commands require a local `DATABASE_URL`. A safe placeholder format is documented in `server/.env.example`; no real credentials are committed.
 
 ## Documentation
 
