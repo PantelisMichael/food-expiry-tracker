@@ -53,6 +53,12 @@ The backend currently includes:
 
 The next major backend step is PostgreSQL and Prisma setup.
 
+Useful backend commands:
+
+- `npm run dev` - run the backend in watch mode
+- `npm run start` - run the backend normally
+- `npm run check` - check backend JavaScript syntax
+
 ## Documentation
 
 - [Project idea](docs/idea.md)
