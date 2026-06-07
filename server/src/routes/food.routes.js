@@ -1,12 +1,12 @@
 const express = require("express");
 const {
-  addFood,
-  deleteFoodByIndex,
+  createFood,
+  deleteFood,
   findFoodById,
-  findFoodIndexById,
   getFoods,
-  getNextFoodId,
-} = require("../data/foods.data");
+  updateFood,
+  updateFoodStatus,
+} = require("../repositories/food.repository");
 const {
   VALID_EXPIRY_STATUSES,
   VALID_ITEM_STATUSES,
@@ -26,8 +26,8 @@ const {
 
 const router = express.Router();
 
-router.get("/api/foods", (req, res) => {
-  let foodList = getFoodsWithExpiryStatus(getFoods());
+router.get("/api/foods", async (req, res) => {
+  let foodList = getFoodsWithExpiryStatus(await getFoods());
   const { search, category, location, status, itemStatus, sort, order = "asc" } = req.query;
 
   if (status && !VALID_EXPIRY_STATUSES.includes(status)) {
@@ -83,15 +83,15 @@ router.get("/api/foods", (req, res) => {
   res.json(foodList);
 });
 
-router.get("/api/foods/use-first", (req, res) => {
-  res.json(getUseFirstFoods(getFoods()));
+router.get("/api/foods/use-first", async (req, res) => {
+  res.json(getUseFirstFoods(await getFoods()));
 });
 
-router.get("/api/foods/stats", (req, res) => {
-  res.json(getFoodStats(getFoods()));
+router.get("/api/foods/stats", async (req, res) => {
+  res.json(getFoodStats(await getFoods()));
 });
 
-router.get("/api/foods/:id", (req, res) => {
+router.get("/api/foods/:id", async (req, res) => {
   const foodId = getFoodIdFromRequest(req);
 
   if (!foodId) {
@@ -100,7 +100,7 @@ router.get("/api/foods/:id", (req, res) => {
     });
   }
 
-  const food = findFoodById(foodId);
+  const food = await findFoodById(foodId);
 
   if (!food) {
     return res.status(404).json({
@@ -111,7 +111,7 @@ router.get("/api/foods/:id", (req, res) => {
   res.json(addExpiryStatus(food));
 });
 
-router.post("/api/foods", (req, res) => {
+router.post("/api/foods", async (req, res) => {
   const { name, category, quantity, unit, location, expiryDate } = req.body;
 
   if (!isNonEmptyString(name) || !isNonEmptyString(expiryDate)) {
@@ -132,8 +132,7 @@ router.post("/api/foods", (req, res) => {
     });
   }
 
-  const newFood = {
-    id: getNextFoodId(),
+  const newFood = await createFood({
     name: name.trim(),
     category: isNonEmptyString(category) ? category.trim() : "Uncategorized",
     quantity: quantity || 1,
@@ -141,14 +140,12 @@ router.post("/api/foods", (req, res) => {
     location: isNonEmptyString(location) ? location.trim() : "Unknown",
     expiryDate,
     itemStatus: "ACTIVE",
-  };
-
-  addFood(newFood);
+  });
 
   res.status(201).json(addExpiryStatus(newFood));
 });
 
-router.patch("/api/foods/:id", (req, res) => {
+router.patch("/api/foods/:id", async (req, res) => {
   const foodId = getFoodIdFromRequest(req);
 
   if (!foodId) {
@@ -157,7 +154,7 @@ router.patch("/api/foods/:id", (req, res) => {
     });
   }
 
-  const food = findFoodById(foodId);
+  const food = await findFoodById(foodId);
 
   if (!food) {
     return res.status(404).json({
@@ -191,34 +188,38 @@ router.patch("/api/foods/:id", (req, res) => {
     });
   }
 
+  const updates = {};
+
   if (name !== undefined) {
-    food.name = name.trim();
+    updates.name = name.trim();
   }
 
   if (category !== undefined) {
-    food.category = isNonEmptyString(category) ? category.trim() : "Uncategorized";
+    updates.category = isNonEmptyString(category) ? category.trim() : "Uncategorized";
   }
 
   if (quantity !== undefined) {
-    food.quantity = quantity;
+    updates.quantity = quantity;
   }
 
   if (unit !== undefined) {
-    food.unit = isNonEmptyString(unit) ? unit.trim() : "item";
+    updates.unit = isNonEmptyString(unit) ? unit.trim() : "item";
   }
 
   if (location !== undefined) {
-    food.location = isNonEmptyString(location) ? location.trim() : "Unknown";
+    updates.location = isNonEmptyString(location) ? location.trim() : "Unknown";
   }
 
   if (expiryDate !== undefined) {
-    food.expiryDate = expiryDate;
+    updates.expiryDate = expiryDate;
   }
 
-  res.json(addExpiryStatus(food));
+  const updatedFood = await updateFood(foodId, updates);
+
+  res.json(addExpiryStatus(updatedFood));
 });
 
-router.delete("/api/foods/:id", (req, res) => {
+router.delete("/api/foods/:id", async (req, res) => {
   const foodId = getFoodIdFromRequest(req);
 
   if (!foodId) {
@@ -227,15 +228,15 @@ router.delete("/api/foods/:id", (req, res) => {
     });
   }
 
-  const foodIndex = findFoodIndexById(foodId);
+  const food = await findFoodById(foodId);
 
-  if (foodIndex === -1) {
+  if (!food) {
     return res.status(404).json({
       error: "Food item not found",
     });
   }
 
-  const deletedFood = deleteFoodByIndex(foodIndex);
+  const deletedFood = await deleteFood(foodId);
 
   res.json({
     message: "Food item deleted",
@@ -243,7 +244,7 @@ router.delete("/api/foods/:id", (req, res) => {
   });
 });
 
-router.patch("/api/foods/:id/consume", (req, res) => {
+router.patch("/api/foods/:id/consume", async (req, res) => {
   const foodId = getFoodIdFromRequest(req);
 
   if (!foodId) {
@@ -252,7 +253,7 @@ router.patch("/api/foods/:id/consume", (req, res) => {
     });
   }
 
-  const food = findFoodById(foodId);
+  const food = await findFoodById(foodId);
 
   if (!food) {
     return res.status(404).json({
@@ -260,12 +261,12 @@ router.patch("/api/foods/:id/consume", (req, res) => {
     });
   }
 
-  food.itemStatus = "CONSUMED";
+  const consumedFood = await updateFoodStatus(foodId, "CONSUMED");
 
-  res.json(addExpiryStatus(food));
+  res.json(addExpiryStatus(consumedFood));
 });
 
-router.patch("/api/foods/:id/waste", (req, res) => {
+router.patch("/api/foods/:id/waste", async (req, res) => {
   const foodId = getFoodIdFromRequest(req);
 
   if (!foodId) {
@@ -274,7 +275,7 @@ router.patch("/api/foods/:id/waste", (req, res) => {
     });
   }
 
-  const food = findFoodById(foodId);
+  const food = await findFoodById(foodId);
 
   if (!food) {
     return res.status(404).json({
@@ -282,9 +283,9 @@ router.patch("/api/foods/:id/waste", (req, res) => {
     });
   }
 
-  food.itemStatus = "WASTED";
+  const wastedFood = await updateFoodStatus(foodId, "WASTED");
 
-  res.json(addExpiryStatus(food));
+  res.json(addExpiryStatus(wastedFood));
 });
 
 module.exports = router;
