@@ -4,6 +4,7 @@ const { createFoodRepository } = require("../src/repositories/food.repository");
 
 function createFakeDatabase(overrides = {}) {
   return {
+    $disconnect: async () => {},
     food: {
       create: async () => null,
       delete: async () => null,
@@ -166,4 +167,20 @@ test("database repository updates food status", async () => {
     data: { itemStatus: "WASTED" },
   });
   assert.equal(food.itemStatus, "WASTED");
+});
+
+test("database repository disconnects the Prisma client", async () => {
+  let disconnected = false;
+  const database = createFakeDatabase();
+  database.$disconnect = async () => {
+    disconnected = true;
+  };
+  const repository = createFoodRepository({
+    dataSource: "database",
+    database,
+  });
+
+  await repository.disconnect();
+
+  assert.equal(disconnected, true);
 });

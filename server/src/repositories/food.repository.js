@@ -96,6 +96,12 @@ function createFoodRepository(options = {}) {
     return formatFood(food);
   }
 
+  async function disconnect() {
+    if (dataSource === "database") {
+      await getDatabase().$disconnect();
+    }
+  }
+
   async function updateFoodStatus(foodId, itemStatus) {
     return updateFood(foodId, { itemStatus });
   }
@@ -103,6 +109,7 @@ function createFoodRepository(options = {}) {
   return {
     createFood,
     deleteFood,
+    disconnect,
     findFoodById,
     getFoods,
     updateFood,

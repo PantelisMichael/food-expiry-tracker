@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const { after, before, test } = require("node:test");
 const app = require("../src/app");
+const foodRepository = require("../src/repositories/food.repository");
 
 let server;
 let baseUrl;
@@ -25,6 +26,8 @@ after(async () => {
       resolve();
     });
   });
+
+  await foodRepository.disconnect();
 });
 
 async function apiRequest(path, options = {}) {
